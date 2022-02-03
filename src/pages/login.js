@@ -1,11 +1,13 @@
 import React, {useState, useEffect} from 'react';
 import * as loginStyle from './login.module.css'
+import Message from '../component/Message'
 
 export default function Login() {
 
     //用户名
     const [username, setUsername] = useState(null);
-
+    //弹框提示
+    const [msgVisibility, setMsgVisibility] = useState("hidden");
     //控制显示用户名为空提示
     const [nullNotice, setNullNotice] = useState("hidden");
 
@@ -13,6 +15,7 @@ export default function Login() {
     useEffect(() => {
         document.body.style.display = "flex";
         document.body.style.justifyContent = "center";
+        document.body.style.flexDirection = "row";
         document.body.style.alignItems = "center";
         document.body.style.backgroundColor = "#96d0ce";
         document.body.style.height = "80vh";
@@ -42,10 +45,37 @@ export default function Login() {
     function login() {
         if (!username) {
             showNotice(1500);
+        } else {
+            setMsgVisibility("visible")
+            MsgNoticeRef.current.show(1000)
+            setTimeout(() => {
+                setMsgVisibility("hidden")
+            }, 2000)
         }
     }
 
+    let MsgNoticeRef = React.createRef();
+
     return <div>
+        <Message onRef={MsgNoticeRef}
+                 data={{msg: "这是一段提示"}}
+                 style={{
+                     width: "300px",
+                     height: "40px",
+                     backgroundColor: "#fff2f0",
+                     display: "flex",
+                     justifyContent: "center",
+                     alignItems: "center",
+                     borderRadius: "3px",
+                     visibility: msgVisibility,
+                     marginBottom: "50%",
+                     border: "1px solid #ffffff",
+                     fontSize:"14px",
+                     lineHeight:"1.571",
+                     color:"#f56c6c"
+                 }}>
+
+        </Message>
         <div className={loginStyle.login}>
             <div className={loginStyle.server}>
                 连接服务器成功!
