@@ -1,25 +1,56 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import * as loginStyle from './login.module.css'
-import Message from '../component/Message'
+import {Link} from "gatsby"
+import './login.css'
+import simpleSdk from "../lib/simpleSdk";
+import Message from "../component/Message";
 
 export default function Login() {
 
+    //描述(连接服务器失败或成功)
+    const [des, setDes] = useState("Welcome");
     //用户名
-    const [username, setUsername] = useState(null);
+    const [username, setUsername] = useState("");
     //弹框提示
     const [msgVisibility, setMsgVisibility] = useState("hidden");
+    //弹框消息
+    const [noticeMsg, setNoticeMsg] = useState("");
     //控制显示用户名为空提示
     const [nullNotice, setNullNotice] = useState("hidden");
 
+    const routePageRef = useRef();
+
+    let smgNoticeRef = useRef();
 
     useEffect(() => {
-        document.body.style.display = "flex";
-        document.body.style.justifyContent = "center";
-        document.body.style.flexDirection = "row";
-        document.body.style.alignItems = "center";
-        document.body.style.backgroundColor = "#96d0ce";
-        document.body.style.height = "80vh";
+        //打开websocket连接
+        simpleSdk.openWebSocketConnection("ws://127.0.0.1:9000/ws");
+    }, []);
+
+    //监听服务器连接
+    simpleSdk.on("connection-server-success", () => {
+        setDes("连接服务器成功,输入用户名开始聊天!")
     });
+
+    simpleSdk.on("connection-server-fail", () => {
+        setDes("连接服务器失败!")
+    });
+
+    //监听登录成功/失败
+    simpleSdk.on('login-success', function (e) {
+        //跳转页面
+        if (routePageRef.current) {
+            routePageRef.current.click()
+        }
+    });
+
+    simpleSdk.on('login-fail', function (e) {
+        //弹框提示
+        if (smgNoticeRef.current) {
+            noticeFunc(e.data.msg)
+        }
+    });
+
 
     /**
      * 检查input用户名
@@ -41,24 +72,26 @@ export default function Login() {
         }, millisecond);
     }
 
+    function noticeFunc(msg) {
+        setNoticeMsg(msg)
+        setMsgVisibility("visible")
+        smgNoticeRef.current.show(1000)
+        setTimeout(() => {
+            setMsgVisibility("hidden")
+        }, 2000)
+    }
 
     function login() {
         if (!username) {
             showNotice(1500);
-        } else {
-            setMsgVisibility("visible")
-            MsgNoticeRef.current.show(1000)
-            setTimeout(() => {
-                setMsgVisibility("hidden")
-            }, 2000)
         }
+        simpleSdk.login(username)
+        // noticeFunc("dasdasdas")
     }
 
-    let MsgNoticeRef = React.createRef();
-
     return <div>
-        <Message onRef={MsgNoticeRef}
-                 data={{msg: "这是一段提示"}}
+        <Message onRef={smgNoticeRef}
+                 data={{msg: noticeMsg}}
                  style={{
                      width: "300px",
                      height: "40px",
@@ -70,15 +103,18 @@ export default function Login() {
                      visibility: msgVisibility,
                      marginBottom: "50%",
                      border: "1px solid #ffffff",
-                     fontSize:"14px",
-                     lineHeight:"1.571",
-                     color:"#f56c6c"
+                     fontSize: "14px",
+                     lineHeight: "1.571",
+                     color: "#f56c6c"
                  }}>
 
         </Message>
+        <Link to={"/chat"} state={{username: {username}}}>
+            <div ref={routePageRef} style={{display: "none"}}> ignore</div>
+        </Link>
         <div className={loginStyle.login}>
             <div className={loginStyle.server}>
-                连接服务器成功!
+                {des}
             </div>
 
             <div className={loginStyle.inputAndStar}>
