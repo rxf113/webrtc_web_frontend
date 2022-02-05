@@ -1,0 +1,16 @@
+.total {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    /*background: #8c8787;*/
+}
+
+.username {
+    font-family: "JetBrains Mono", serif;
+    color: #166e6c;
+}
+
+.video {
+    background: #000;
+}
