@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import * as loginStyle from './login.module.css'
 import {Link} from "gatsby"
-import './login.css'
 import simpleSdk from "../lib/simpleSdk";
 import Message from "../component/Message";
 
@@ -47,7 +46,7 @@ export default function Login() {
     simpleSdk.on('login-fail', function (e) {
         //弹框提示
         if (smgNoticeRef.current) {
-            noticeFunc(e.data.msg)
+            popNoticeFunc(e.data.msg)
         }
     });
 
@@ -72,7 +71,7 @@ export default function Login() {
         }, millisecond);
     }
 
-    function noticeFunc(msg) {
+    function popNoticeFunc(msg) {
         setNoticeMsg(msg)
         setMsgVisibility("visible")
         smgNoticeRef.current.show(1000)
@@ -84,12 +83,13 @@ export default function Login() {
     function login() {
         if (!username) {
             showNotice(1500);
+            return
         }
         simpleSdk.login(username)
-        // noticeFunc("dasdasdas")
+        // popNoticeFunc("dasdasdas")
     }
 
-    return <div>
+    return <div className={loginStyle.out}>
         <Message onRef={smgNoticeRef}
                  data={{msg: noticeMsg}}
                  style={{

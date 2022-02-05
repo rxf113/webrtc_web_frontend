@@ -66,3 +66,12 @@ input::-webkit-input-placeholder {
     color: #338ce3;
     background: #166e6c;
 }
+
+.out {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    background: #96d0ce;
+    height: 100vh;
+}
