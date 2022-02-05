@@ -308,6 +308,20 @@ let simpleSdk = {
     },
 
     /**
+     * 监听事件
+     *
+     * @param eventNames
+     * @param callbackFunction
+     */
+    onMulti: function (eventNames, callbackFunction) {
+        for (let eventName of eventNames) {
+            window.addEventListener(eventName, function (event) {
+                callbackFunction(event);
+            });
+        }
+    },
+
+    /**
      * 登录
      *
      * @param userName 用户名
@@ -379,7 +393,7 @@ let simpleSdk = {
     openWaitAccept: function () {
         simpleSdk.interval = setInterval(function () {
             //simpleSdk.webSocket.hangUpAll();
-            alert("超时未接听");
+            //alert("超时未接听");
             simpleSdk.clearWaitAccept();
         }, simpleSdk.timeout);
     },
