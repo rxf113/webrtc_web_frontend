@@ -1,12 +1,21 @@
-import React, {useState,useEffect,useRef} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import SimpleVideo from '../component/SimpleVideo'
 import * as chatStyle from "./chat.module.css";
 import simpleSdk from "../lib/simpleSdk";
 import Message from "../component/Message";
+import G from './404'
 
 const Chat = (props) => {
 
-    const username = props.location.state.username["username"]
+    let errorFlag = false
+
+    let username;
+
+    try {
+        username = props.location.state.username["username"]
+    } catch (e) {
+        errorFlag = true
+    }
 
     const mineUserDesc = "我方用户: "
 
@@ -32,15 +41,18 @@ const Chat = (props) => {
 
     const [msgWarningVisibility, setMsgWarningVisibility] = useState("hidden");
 
-    useEffect(()=>{
+    useEffect(() => {
+        if (errorFlag){
+            return
+        }
         // //打开websocket连接
         // simpleSdk.openWebSocketConnection("ws://127.0.0.1:9000/ws");
         //设置视频video标签
-        simpleSdk.setVideoTag(localVideoId,remoteVideoId);
-    },[])
+        simpleSdk.setVideoTag(localVideoId, remoteVideoId);
+    }, [])
 
 
-    useEffect(()=>{
+    useEffect(() => {
         //监听 呼叫成功
         simpleSdk.on('call-success', function (e) {
             if (msgNoticeRef.current) {
@@ -49,7 +61,7 @@ const Chat = (props) => {
         });
 
         //不在线/忙
-        simpleSdk.onMulti(['not-online','busy'], function (e) {
+        simpleSdk.onMulti(['not-online', 'busy'], function (e) {
             if (msgWarningNoticeRef.current) {
                 popWarningNoticeFunc(e.data.msg)
             }
@@ -61,7 +73,7 @@ const Chat = (props) => {
             console.log(e);
             let caller = e.data.msg;
             if (msgNoticeRef.current) {
-                popNoticeFunc(`收到来自 [${caller}] 的视频邀请,3秒后将自动接受`,4000,4000)
+                popNoticeFunc(`收到来自 [${caller}] 的视频邀请,3秒后将自动接受`, 4000, 4000)
             }
             setTimeout(() => {
                 simpleSdk.accept();
@@ -79,10 +91,9 @@ const Chat = (props) => {
         });
 
 
+    }, [])
 
-    },[])
-
-    function popNoticeFunc(msg,showMs=1000,hiddenMs=2000) {
+    function popNoticeFunc(msg, showMs = 1000, hiddenMs = 2000) {
         setNoticeMsg(msg)
         setMsgVisibility("visible")
         msgNoticeRef.current.show(showMs)
@@ -129,10 +140,6 @@ const Chat = (props) => {
         remoteUserRef.current.updateUser(val)
     }
 
-    if (!username) {
-        return <div>404</div>
-    }
-
     const msgCommonStyle = {
         width: "300px",
         height: "40px",
@@ -148,12 +155,12 @@ const Chat = (props) => {
         color: "#24ab15"
     }
 
-    const msgWarningStyle = Object.assign({},msgCommonStyle)
+    const msgWarningStyle = Object.assign({}, msgCommonStyle)
     msgWarningStyle.backgroundColor = "#fff2f0"
     msgWarningStyle.color = "#f56c6c"
     msgWarningStyle.visibility = msgWarningVisibility
 
-    return (
+    return errorFlag ? G() : (
         <div>
             <div style={{
                 height: "100vh",
@@ -163,14 +170,14 @@ const Chat = (props) => {
                 alignItems: "center",
             }}>
 
-               <div>
-                   <Message onRef={msgNoticeRef}
-                            data={{msg: noticeMsg}}
-                            style={msgCommonStyle}/>
-                   <Message onRef={msgWarningNoticeRef}
-                            data={{msg: noticeMsg}}
-                            style={msgWarningStyle}/>
-               </div>
+                <div>
+                    <Message onRef={msgNoticeRef}
+                             data={{msg: noticeMsg}}
+                             style={msgCommonStyle}/>
+                    <Message onRef={msgWarningNoticeRef}
+                             data={{msg: noticeMsg}}
+                             style={msgWarningStyle}/>
+                </div>
                 <div className={chatStyle.des}>
                     我打尼玛的啊？
                 </div>
