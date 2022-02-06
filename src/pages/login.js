@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import * as loginStyle from './login.module.css'
 import {Link} from "gatsby"
-import simpleSdk from "../lib/simpleSdk";
 import Message from "../component/Message";
 
 export default function Login() {
@@ -24,31 +23,33 @@ export default function Login() {
     useEffect(() => {
         //打开websocket连接
         simpleSdk.openWebSocketConnection("ws://127.0.0.1:9000/ws");
+
+        //监听服务器连接
+        simpleSdk.on("connection-server-success", () => {
+            setDes("连接服务器成功,输入用户名开始聊天!")
+        });
+
+        simpleSdk.on("connection-server-fail", () => {
+            setDes("连接服务器失败!")
+        });
+
+        //监听登录成功/失败
+        simpleSdk.on('login-success', function (e) {
+            //跳转页面
+            if (routePageRef.current) {
+                routePageRef.current.click()
+            }
+        });
+
+        simpleSdk.on('login-fail', function (e) {
+            //弹框提示
+            if (smgNoticeRef.current) {
+                popNoticeFunc(e.data.msg)
+            }
+        });
     }, []);
 
-    //监听服务器连接
-    simpleSdk.on("connection-server-success", () => {
-        setDes("连接服务器成功,输入用户名开始聊天!")
-    });
 
-    simpleSdk.on("connection-server-fail", () => {
-        setDes("连接服务器失败!")
-    });
-
-    //监听登录成功/失败
-    simpleSdk.on('login-success', function (e) {
-        //跳转页面
-        if (routePageRef.current) {
-            routePageRef.current.click()
-        }
-    });
-
-    simpleSdk.on('login-fail', function (e) {
-        //弹框提示
-        if (smgNoticeRef.current) {
-            popNoticeFunc(e.data.msg)
-        }
-    });
 
 
     /**
