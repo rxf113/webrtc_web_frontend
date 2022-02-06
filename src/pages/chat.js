@@ -33,20 +33,33 @@ const Chat = (props) => {
 
     const msgNoticeRef = useRef();
 
-    const msgWarningNoticeRef = useRef();
-
     const [noticeMsg, setNoticeMsg] = useState("");
 
     const [msgVisibility, setMsgVisibility] = useState("hidden");
 
-    const [msgWarningVisibility, setMsgWarningVisibility] = useState("hidden");
+    const [msgBackgroundColor, setMsgBackgroundColor] = useState("#aed3ae");
+
+    const [msgColor, setMsgColor] = useState("#24ab15");
+
+    const msgCommonStyle = {
+        width: "300px",
+        height: "40px",
+        backgroundColor: msgBackgroundColor,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: "3px",
+        visibility: msgVisibility,
+        border: "1px solid #ffffff",
+        fontSize: "14px",
+        lineHeight: "1.571",
+        color: msgColor
+    }
 
     useEffect(() => {
-        if (errorFlag){
+        if (errorFlag) {
             return
         }
-        // //打开websocket连接
-        // simpleSdk.openWebSocketConnection("ws://127.0.0.1:9000/ws");
         //设置视频video标签
         simpleSdk.setVideoTag(localVideoId, remoteVideoId);
     }, [])
@@ -62,8 +75,8 @@ const Chat = (props) => {
 
         //不在线/忙
         simpleSdk.onMulti(['not-online', 'busy'], function (e) {
-            if (msgWarningNoticeRef.current) {
-                popWarningNoticeFunc(e.data.msg)
+            if (msgNoticeRef.current) {
+                popNoticeFunc(e.data.msg, setWarningStyle)
             }
         });
 
@@ -73,7 +86,7 @@ const Chat = (props) => {
             console.log(e);
             let caller = e.data.msg;
             if (msgNoticeRef.current) {
-                popNoticeFunc(`收到来自 [${caller}] 的视频邀请,3秒后将自动接受`, 4000, 4000)
+                popNoticeFunc(`收到来自 [${caller}] 的视频邀请,3秒后将自动接受`, undefined, 4000, 4000)
             }
             setTimeout(() => {
                 simpleSdk.accept();
@@ -93,22 +106,25 @@ const Chat = (props) => {
 
     }, [])
 
-    function popNoticeFunc(msg, showMs = 1000, hiddenMs = 2000) {
+    function setCommonStyle() {
+        setMsgBackgroundColor("#aed3ae")
+        setMsgColor("#24ab15")
+    }
+
+    function setWarningStyle() {
+        setMsgBackgroundColor("#fff2f0")
+        setMsgColor("#f56c6c")
+    }
+
+    function popNoticeFunc(msg, setStyle = setCommonStyle, showMs = 1000, hiddenMs = 2000) {
         setNoticeMsg(msg)
+        //背景和颜色
+        setStyle()
         setMsgVisibility("visible")
         msgNoticeRef.current.show(showMs)
         setTimeout(() => {
             setMsgVisibility("hidden")
         }, hiddenMs)
-    }
-
-    function popWarningNoticeFunc(msg) {
-        setNoticeMsg(msg)
-        setMsgWarningVisibility("visible")
-        msgWarningNoticeRef.current.show(1000)
-        setTimeout(() => {
-            setMsgWarningVisibility("hidden")
-        }, 2000)
     }
 
     function call() {
@@ -140,25 +156,6 @@ const Chat = (props) => {
         remoteUserRef.current.updateUser(val)
     }
 
-    const msgCommonStyle = {
-        width: "300px",
-        height: "40px",
-        backgroundColor: "#aed3ae",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        borderRadius: "3px",
-        visibility: msgVisibility,
-        border: "1px solid #ffffff",
-        fontSize: "14px",
-        lineHeight: "1.571",
-        color: "#24ab15"
-    }
-
-    const msgWarningStyle = Object.assign({}, msgCommonStyle)
-    msgWarningStyle.backgroundColor = "#fff2f0"
-    msgWarningStyle.color = "#f56c6c"
-    msgWarningStyle.visibility = msgWarningVisibility
 
     return errorFlag ? G() : (
         <div>
@@ -174,9 +171,6 @@ const Chat = (props) => {
                     <Message onRef={msgNoticeRef}
                              data={{msg: noticeMsg}}
                              style={msgCommonStyle}/>
-                    <Message onRef={msgWarningNoticeRef}
-                             data={{msg: noticeMsg}}
-                             style={msgWarningStyle}/>
                 </div>
                 <div className={chatStyle.des}>
                     我打尼玛的啊？
