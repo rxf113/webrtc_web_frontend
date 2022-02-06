@@ -90,6 +90,8 @@ const Chat = (props) => {
             }
             setTimeout(() => {
                 simpleSdk.accept();
+                //设置名称
+                setRemoteUser(caller)
             }, 3000);
         });
 
