@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useRef} from "react";
 import SimpleVideo from '../component/SimpleVideo'
 import * as chatStyle from "./chat.module.css";
-import simpleSdk from "../lib/simpleSdk";
 import Message from "../component/Message";
 import G from './404'
 
